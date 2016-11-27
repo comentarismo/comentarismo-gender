@@ -15,15 +15,15 @@ import (
 )
 
 var (
-	English_ignore_words_map    = make(map[string]int)
+	English_ignore_words_map = make(map[string]int)
 	Portuguese_ignore_words_map = make(map[string]int)
-	Spanish_ignore_words_map    = make(map[string]int)
-	Italian_ignore_words_map    = make(map[string]int)
-	French_ignore_words_map     = make(map[string]int)
+	Spanish_ignore_words_map = make(map[string]int)
+	Italian_ignore_words_map = make(map[string]int)
+	French_ignore_words_map = make(map[string]int)
 
 	RedisClient  *redis.Client
 	Redis_prefix = "bayes:"
-	correction   = 0.1
+	correction = 0.1
 )
 
 type GenderReport struct {
@@ -84,7 +84,7 @@ func Occurances(words []string) (counts map[string]uint) {
 			counts[word] = 1
 		}
 	}
-	Debug("compute word occurances, ",counts)
+	Debug("compute word occurances, ", counts)
 	return
 }
 
@@ -99,7 +99,7 @@ func Flush() {
 }
 
 func Train(categories, text, l string) {
-	RedisClient.SAdd(Redis_prefix+"categories", categories)
+	RedisClient.SAdd(Redis_prefix + "categories", categories)
 
 	detectedLang := ""
 	var err error
@@ -113,13 +113,13 @@ func Train(categories, text, l string) {
 		detectedLang = l
 	}
 
-	Debug("Train, Lang detected: ",detectedLang)
+	Debug("Train, Lang detected: ", detectedLang)
 
 	token_occur := GetOccurances(detectedLang, text)
 
 	for word, count := range token_occur {
-		Debug("Train, ", Redis_prefix+categories, word, count)
-		RedisClient.HIncrBy(Redis_prefix+categories, word, int64(count))
+		Debug("Train, ", Redis_prefix + categories, word, count)
+		RedisClient.HIncrBy(Redis_prefix + categories, word, int64(count))
 	}
 }
 
@@ -141,22 +141,22 @@ func Untrain(categories, text, l string) {
 	token_occur := GetOccurances(detectedLang, text)
 
 	for word, count := range token_occur {
-		reply := RedisClient.HGet(Redis_prefix+categories, word)
+		reply := RedisClient.HGet(Redis_prefix + categories, word)
 
 		cur, _ := strconv.ParseUint(string(reply.Val()), 10, 0)
 		if cur != 0 {
 			inew := cur - uint64(count)
 			if inew > 0 {
-				RedisClient.HSet(Redis_prefix+categories, word, strconv.Itoa(int(inew)))
+				RedisClient.HSet(Redis_prefix + categories, word, strconv.Itoa(int(inew)))
 			} else {
-				RedisClient.HDel(Redis_prefix+categories, word)
+				RedisClient.HDel(Redis_prefix + categories, word)
 			}
 		}
 	}
 
 	if Tally(categories) == 0 {
 		RedisClient.Del(Redis_prefix + categories)
-		RedisClient.SRem(Redis_prefix+"categories", categories)
+		RedisClient.SRem(Redis_prefix + "categories", categories)
 	}
 }
 
@@ -173,10 +173,10 @@ func Classify(text, lang string) (key string) {
 		}
 
 		Debug("Classify, key: ", key, max)
-		if key == "bad" && max == 0 {
-			Debug("Will reclassify false gender to not gender as score is too low for being gender ")
-			key = "good"
-		}
+		//if key == "bad" && max == 0 {
+		//	Debug("Will reclassify false gender to not gender as score is too low for being gender ")
+		//	key = "good"
+		//}
 
 		return
 	}
@@ -220,8 +220,8 @@ func Score(text, l string) (res map[string]float64) {
 		for word, v := range token_occur {
 			Debug("Score, range token_occur,", word, ", count:", v)
 
-			Debug("Score, will run RedisClient.HGet,", Redis_prefix+category, word)
-			score := RedisClient.HGet(Redis_prefix+category, word)
+			Debug("Score, will run RedisClient.HGet,", Redis_prefix + category, word)
+			score := RedisClient.HGet(Redis_prefix + category, word)
 			Debug("Score, result of RedisClient.HGet,", score.Val())
 
 			if score == nil {
@@ -288,10 +288,10 @@ func GetOccurances(lang, text string) (counts map[string]uint) {
 	return
 }
 
-func Gender(gender string) string{
+func Gender(gender string) string {
 	if gender == "F" {
 		return "good"
-	}else {
+	} else {
 		return "bad"
 	}
 }
@@ -327,7 +327,7 @@ func init() {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     REDIS_HOST + ":" + REDIS_PORT,
 		Password: REDIS_PASSWORD, // no password set
-		DB:       0,              // use default DB
+		DB:       0, // use default DB
 	})
 
 	pong, err := RedisClient.Ping().Result()
@@ -346,7 +346,7 @@ func init() {
 		done := make(chan bool, end - start)
 		for i := start; i <= end; i++ {
 			targetFile := fmt.Sprintf("names/yob%d.txt", i)
-			go StartLanguageGender(targetFile, done)
+			go StartLanguageGender(targetFile,done)
 		}
 		for j := start; j <= end; j++ {
 			<-done
@@ -354,7 +354,7 @@ func init() {
 	}
 }
 
-func StartLanguageGender(filename string, done chan bool) {
+func StartLanguageGender(filename string,done chan bool) {
 	Debug("StartLanguageGender init, ", filename)
 	filename = GetPWD(filename)
 	file, _ := os.Open(filename)
@@ -366,18 +366,19 @@ func StartLanguageGender(filename string, done chan bool) {
 			break
 		}
 
-		count, _ := strconv.ParseInt(record[2], 10, 8)
+		//count, _ := strconv.ParseInt(record[2], 10, 8)
 		name := strings.ToLower(record[0])
 		g := Gender(record[1])
-		idx := 0
-		for idx <= int(count) {
+		//idx := 0
+		//for idx <= int(count) {
+			Debug("Train(g, name, lang)", g, name, "en")
 			Train(g, name, "en")
-			idx++
-		}
+			//idx++
+		//}
 	}
-	fmt.Println("finished parsing", filename)
-	done <- true
+	Debug("finished parsing", filename)
 	Debug("StartLanguageGender end")
+	done <- true
 }
 
 func GetPWD(targetFile string) (pdw string) {
