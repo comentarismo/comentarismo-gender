@@ -31,9 +31,12 @@ func init() {
 			targetFile := fmt.Sprintf("/gender/en/yob%d.txt", i)
 			go gender.StartLanguageGender(targetFile, done)
 		}
-		for j := start; j <= end; j++ {
-			<-done
-		}
+		go func() {
+			for j := start; j <= end; j++ {
+				targetFile := fmt.Sprintf("/gender/en/yob%d.txt", j)
+				log.Println("Finished learning ", <-done, targetFile)
+			}
+		}()
 
 	}
 }
