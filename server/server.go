@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"comentarismo-gender/gender"
 )
 
 var (
@@ -18,6 +19,23 @@ type WebError struct {
 }
 
 func init() {
+	//
+	if gender.LEARNGENDER == "true" {
+		//will train with world know gender words
+		var start = 1950
+		var end = 2012
+		log.Println("Will start server on learning mode")
+
+		done := make(chan bool, end - start)
+		for i := start; i <= end; i++ {
+			targetFile := fmt.Sprintf("/gender/en/yob%d.txt", i)
+			go gender.StartLanguageGender(targetFile, done)
+		}
+		for j := start; j <= end; j++ {
+			<-done
+		}
+
+	}
 }
 
 //NewServer return pointer to new created server object

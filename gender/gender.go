@@ -4,7 +4,6 @@ import (
 	"comentarismo-gender/lang"
 	"encoding/csv"
 	"encoding/gob"
-	"fmt"
 	redis "gopkg.in/redis.v3"
 	"log"
 	"math"
@@ -129,7 +128,7 @@ func Occurances(words []string) (counts map[string]uint) {
 			counts[word] = 1
 		}
 	}
-	Debug("compute word occurances, ", counts)
+	//Debug("compute word occurances, ", counts)
 	return
 }
 
@@ -158,12 +157,12 @@ func Train(categories, text, l string) {
 		detectedLang = l
 	}
 
-	Debug("Train, Lang detected: ", detectedLang)
+	//Debug("Train, Lang detected: ", detectedLang)
 
 	token_occur := GetOccurances(detectedLang, text)
 
 	for word, count := range token_occur {
-		Debug("Train, ", Redis_prefix+categories, word, count)
+		//Debug("Train, ", Redis_prefix + categories, word, count)
 		RedisClient.HIncrBy(Redis_prefix+categories, word, int64(count))
 	}
 }
@@ -381,23 +380,6 @@ func init() {
 		panic("Can't connect to Redis Server")
 	}
 	Debug(pong)
-
-	//train with world know gender words
-	if LEARNGENDER == "true" {
-		var start = 1950
-		var end = 2012
-		Debug("Will start server on learning mode")
-
-		done := make(chan bool, end-start)
-		for i := start; i <= end; i++ {
-			targetFile := fmt.Sprintf("names/yob%d.txt", i)
-			go StartLanguageGender(targetFile, done)
-		}
-		for j := start; j <= end; j++ {
-			<-done
-		}
-
-	}
 }
 
 func StartLanguageGender(filename string, done chan bool) {
@@ -415,7 +397,7 @@ func StartLanguageGender(filename string, done chan bool) {
 		g := Gender(record[1])
 		//idx := 0
 		//for idx <= int(count) {
-		Debug("Train(g, name, lang)", g, name, "en")
+		//Debug("Train(g, name, lang)", g, name, "en")
 		Train(g, name, "en")
 		//idx++
 		//}
@@ -435,8 +417,10 @@ func StartLanguageGender(filename string, done chan bool) {
 func GetPWD(targetFile string) (pdw string) {
 	path, _ := os.Getwd()
 	pdw = path + targetFile
+	Debug("GetPWD pdw -> ", pdw, " path, ", path, "targetfile: ", targetFile)
 	if _, err := os.Stat(pdw); os.IsNotExist(err) {
 		pdw = path + "/.." + targetFile
+		Debug("", pdw)
 	}
 	return
 }

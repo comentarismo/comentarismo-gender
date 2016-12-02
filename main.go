@@ -1,15 +1,15 @@
 package main
 
 import (
-	"os"
 	"comentarismo-gender/server"
+	"os"
 )
 
 var Port = os.Getenv("PORT")
 
 func main() {
 	if Port == "" {
-		Port = "3004"
+		Port = "3005"
 	}
 	server.StartServer(Port)
 }
