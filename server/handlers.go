@@ -1,14 +1,14 @@
 package server
 
 import (
-	"net/http"
-	"log"
-	"encoding/json"
 	"comentarismo-gender/gender"
+	"encoding/json"
+	"log"
+	"net/http"
 )
 
 func ReportGenderHandler(w http.ResponseWriter, req *http.Request) {
-	req.ParseForm()  //Parse url parameters passed, then parse the response packet for the POST body (request body)
+	req.ParseForm() //Parse url parameters passed, then parse the response packet for the POST body (request body)
 	//log.Println(req.Form) // print information on server side.
 
 	lang := req.URL.Query().Get("lang")

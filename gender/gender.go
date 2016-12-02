@@ -2,6 +2,9 @@ package gender
 
 import (
 	"comentarismo-gender/lang"
+	"encoding/csv"
+	"encoding/gob"
+	"fmt"
 	redis "gopkg.in/redis.v3"
 	"log"
 	"math"
@@ -9,21 +12,18 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"fmt"
-	"encoding/csv"
-	"io"
 )
 
 var (
-	English_ignore_words_map = make(map[string]int)
+	English_ignore_words_map    = make(map[string]int)
 	Portuguese_ignore_words_map = make(map[string]int)
-	Spanish_ignore_words_map = make(map[string]int)
-	Italian_ignore_words_map = make(map[string]int)
-	French_ignore_words_map = make(map[string]int)
+	Spanish_ignore_words_map    = make(map[string]int)
+	Italian_ignore_words_map    = make(map[string]int)
+	French_ignore_words_map     = make(map[string]int)
 
 	RedisClient  *redis.Client
 	Redis_prefix = "bayes:"
-	correction = 0.1
+	correction   = 0.1
 )
 
 type GenderReport struct {
@@ -32,12 +32,21 @@ type GenderReport struct {
 	Gender string `json:"gender"`
 }
 
+type GenderStruct struct {
+	Count    int64  `json:"count"`
+	Name     string `json:"name"`
+	Gender   string `json:"gender"`
+	Language string `json:"gender"`
+}
+
 var REDIS_HOST = os.Getenv("REDIS_HOST")
 var REDIS_PORT = os.Getenv("REDIS_PORT")
 var REDIS_PASSWORD = os.Getenv("REDIS_PASSWORD")
 var GENDER_DEBUG = os.Getenv("GENDER_DEBUG")
 
 var LEARNGENDER = os.Getenv("LEARNGENDER")
+
+var GenderList []GenderStruct
 
 // replace \_.,<>:;~+|\[\]?`"!@#$%^&*()\s chars with whitespace
 // re.sub(r'[\_.,<>:;~+|\[\]?`"!@#$%^&*()\s]', ' '
@@ -50,6 +59,42 @@ func Tidy(s string) (safe string) {
 
 	text_in_lower := strings.ToLower(s)
 	safe = reg.ReplaceAllLiteralString(text_in_lower, " ")
+	return
+}
+
+// Serialize this classifier to a file.
+func WriteToFile(name string) (err error) {
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Println("Error when WriteToFile(), ", err)
+		return
+	}
+	enc := gob.NewEncoder(file)
+	err = enc.Encode(GenderList)
+	return
+}
+
+// De-Serialize this classifier from a file.
+func ReadFromFile(name string) (GenderList []GenderStruct, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		log.Println("Error when ReadFromFile(), ", err)
+		return
+	}
+	dec := gob.NewDecoder(file)
+	err = dec.Decode(&GenderList)
+	return
+}
+
+func LearnFromFile(name string) (GenderList []GenderStruct, err error) {
+	GenderList, err = ReadFromFile(name)
+	if err != nil {
+		log.Println("Error when LearnFromFile() ReadFromFile(), ", err)
+		return
+	}
+	for _, v := range GenderList {
+		Train(v.Gender, v.Name, v.Language)
+	}
 	return
 }
 
@@ -99,7 +144,7 @@ func Flush() {
 }
 
 func Train(categories, text, l string) {
-	RedisClient.SAdd(Redis_prefix + "categories", categories)
+	RedisClient.SAdd(Redis_prefix+"categories", categories)
 
 	detectedLang := ""
 	var err error
@@ -118,8 +163,8 @@ func Train(categories, text, l string) {
 	token_occur := GetOccurances(detectedLang, text)
 
 	for word, count := range token_occur {
-		Debug("Train, ", Redis_prefix + categories, word, count)
-		RedisClient.HIncrBy(Redis_prefix + categories, word, int64(count))
+		Debug("Train, ", Redis_prefix+categories, word, count)
+		RedisClient.HIncrBy(Redis_prefix+categories, word, int64(count))
 	}
 }
 
@@ -141,22 +186,22 @@ func Untrain(categories, text, l string) {
 	token_occur := GetOccurances(detectedLang, text)
 
 	for word, count := range token_occur {
-		reply := RedisClient.HGet(Redis_prefix + categories, word)
+		reply := RedisClient.HGet(Redis_prefix+categories, word)
 
 		cur, _ := strconv.ParseUint(string(reply.Val()), 10, 0)
 		if cur != 0 {
 			inew := cur - uint64(count)
 			if inew > 0 {
-				RedisClient.HSet(Redis_prefix + categories, word, strconv.Itoa(int(inew)))
+				RedisClient.HSet(Redis_prefix+categories, word, strconv.Itoa(int(inew)))
 			} else {
-				RedisClient.HDel(Redis_prefix + categories, word)
+				RedisClient.HDel(Redis_prefix+categories, word)
 			}
 		}
 	}
 
 	if Tally(categories) == 0 {
 		RedisClient.Del(Redis_prefix + categories)
-		RedisClient.SRem(Redis_prefix + "categories", categories)
+		RedisClient.SRem(Redis_prefix+"categories", categories)
 	}
 }
 
@@ -220,8 +265,8 @@ func Score(text, l string) (res map[string]float64) {
 		for word, v := range token_occur {
 			Debug("Score, range token_occur,", word, ", count:", v)
 
-			Debug("Score, will run RedisClient.HGet,", Redis_prefix + category, word)
-			score := RedisClient.HGet(Redis_prefix + category, word)
+			Debug("Score, will run RedisClient.HGet,", Redis_prefix+category, word)
+			score := RedisClient.HGet(Redis_prefix+category, word)
 			Debug("Score, result of RedisClient.HGet,", score.Val())
 
 			if score == nil {
@@ -327,7 +372,7 @@ func init() {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     REDIS_HOST + ":" + REDIS_PORT,
 		Password: REDIS_PASSWORD, // no password set
-		DB:       0, // use default DB
+		DB:       0,              // use default DB
 	})
 
 	pong, err := RedisClient.Ping().Result()
@@ -343,38 +388,44 @@ func init() {
 		var end = 2012
 		Debug("Will start server on learning mode")
 
-		done := make(chan bool, end - start)
+		done := make(chan bool, end-start)
 		for i := start; i <= end; i++ {
 			targetFile := fmt.Sprintf("names/yob%d.txt", i)
-			go StartLanguageGender(targetFile,done)
+			go StartLanguageGender(targetFile, done)
 		}
 		for j := start; j <= end; j++ {
 			<-done
 		}
+
 	}
 }
 
-func StartLanguageGender(filename string,done chan bool) {
+func StartLanguageGender(filename string, done chan bool) {
 	Debug("StartLanguageGender init, ", filename)
 	filename = GetPWD(filename)
 	file, _ := os.Open(filename)
 	defer file.Close()
 	reader := csv.NewReader(file)
-	for {
-		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
 
-		//count, _ := strconv.ParseInt(record[2], 10, 8)
+	result, _ := reader.ReadAll()
+	for _, record := range result {
+
+		count, _ := strconv.ParseInt(record[2], 10, 8)
 		name := strings.ToLower(record[0])
 		g := Gender(record[1])
 		//idx := 0
 		//for idx <= int(count) {
-			Debug("Train(g, name, lang)", g, name, "en")
-			Train(g, name, "en")
-			//idx++
+		Debug("Train(g, name, lang)", g, name, "en")
+		Train(g, name, "en")
+		//idx++
 		//}
+		//
+		GenderList = append(GenderList, GenderStruct{
+			Count:    count,
+			Name:     name,
+			Gender:   g,
+			Language: "en",
+		})
 	}
 	Debug("finished parsing", filename)
 	Debug("StartLanguageGender end")

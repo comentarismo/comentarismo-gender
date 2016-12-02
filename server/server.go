@@ -2,11 +2,11 @@ package server
 
 import (
 	"fmt"
+	"github.com/facebookgo/grace/gracehttp"
+	"github.com/gorilla/pat"
 	"log"
 	"net/http"
 	"os"
-	"github.com/gorilla/pat"
-	"github.com/facebookgo/grace/gracehttp"
 )
 
 var (
@@ -16,7 +16,6 @@ var (
 type WebError struct {
 	Error string
 }
-
 
 func init() {
 }
@@ -50,7 +49,7 @@ func InitRouting() *pat.Router {
 	r := pat.New()
 
 	/** bayes classifier spam **/
-	r.Post("/gender",GenderHandler)
+	r.Post("/gender", GenderHandler)
 	r.Post("/revoke", RevokeGenderHandler)
 	r.Post("/report", ReportGenderHandler)
 

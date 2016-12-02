@@ -1,14 +1,14 @@
 package server_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/drewolson/testflight"
-	"testing"
-	"log"
-	"encoding/json"
-	. "github.com/smartystreets/goconvey/convey"
-	"comentarismo-gender/server"
 	"comentarismo-gender/gender"
+	"comentarismo-gender/server"
+	"encoding/json"
+	"github.com/drewolson/testflight"
+	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"log"
+	"testing"
 )
 
 func TestMaleGenderHandler(t *testing.T) {
@@ -17,49 +17,48 @@ func TestMaleGenderHandler(t *testing.T) {
 
 		Convey("Should Learn female names in english and report gender female for a female name", t, func() {
 			targetWord := "matt"
-			response := r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response := r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "matthew"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "hank"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "mark"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "edward"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "henry"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "charlie"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "ben"
-			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=M", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
-
 			//now try with a name
 			textTarget := "charlie"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -76,7 +75,7 @@ func TestMaleGenderHandler(t *testing.T) {
 
 			//now try with another male name
 			textTarget = "henry"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -91,10 +90,9 @@ func TestMaleGenderHandler(t *testing.T) {
 			So(genderReport.Code, ShouldEqual, 200)
 			So(genderReport.Gender, ShouldEqual, "male")
 
-
 			//now revoke the name
 			textTarget = "henry"
-			response = r.Post("/revoke?lang=en&gender=F", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/revoke?lang=en&gender=F", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -102,7 +100,7 @@ func TestMaleGenderHandler(t *testing.T) {
 
 			//now it should not be that gender anymore
 			textTarget = "henry"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)

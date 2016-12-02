@@ -1,14 +1,14 @@
 package server_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/drewolson/testflight"
-	"testing"
-	"log"
-	"encoding/json"
-	. "github.com/smartystreets/goconvey/convey"
-	"comentarismo-gender/server"
 	"comentarismo-gender/gender"
+	"comentarismo-gender/server"
+	"encoding/json"
+	"github.com/drewolson/testflight"
+	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"log"
+	"testing"
 )
 
 func TestFemaleGenderHandler(t *testing.T) {
@@ -17,39 +17,38 @@ func TestFemaleGenderHandler(t *testing.T) {
 
 		Convey("Should Learn female names in english and report gender female for a female name", t, func() {
 			targetWord := "rachael"
-			response := r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response := r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "hannah"
-			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "norah"
-			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "claire"
-			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "marsha"
-			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
 			targetWord = "rachael"
-			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text=" + targetWord);
+			response = r.Post("/report?lang=en&gender=F", testflight.FORM_ENCODED, "text="+targetWord)
 			log.Println(response.Body)
 			assert.Equal(t, 200, response.StatusCode)
 
-
 			//now try with a name
 			textTarget := "rachael"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -66,7 +65,7 @@ func TestFemaleGenderHandler(t *testing.T) {
 
 			//now try with a spammy comment
 			textTarget = "marsha"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -81,10 +80,9 @@ func TestFemaleGenderHandler(t *testing.T) {
 			So(genderReport.Code, ShouldEqual, 200)
 			So(genderReport.Gender, ShouldEqual, "female")
 
-
 			//now revoke the gendermy comment
 			textTarget = "marsha"
-			response = r.Post("/revoke?lang=en&gender=F", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/revoke?lang=en&gender=F", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
@@ -92,7 +90,7 @@ func TestFemaleGenderHandler(t *testing.T) {
 
 			//now it should not be gender anymore
 			textTarget = "marsha"
-			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget );
+			response = r.Post("/gender?lang=en", testflight.FORM_ENCODED, "text="+textTarget)
 
 			So(response.StatusCode, ShouldEqual, 200)
 			So(len(response.Body), ShouldBeGreaterThan, 0)
