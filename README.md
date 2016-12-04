@@ -2,6 +2,11 @@ Comentarismo Gender API
 
 # A API to determine gender on names
 
+Inside the redis bayes the following is applied:
+* female is good - that means is on the good bayes
+* male is bad - that means is on the bad bayes
+
+
 # Options
 ```
 GENDER_DEBUG, if true will debug all log entries for gender detection (optional)

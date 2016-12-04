@@ -332,6 +332,8 @@ func GetOccurances(lang, text string) (counts map[string]uint) {
 	return
 }
 
+//female = good
+//male =  bad
 func Gender(gender string) string {
 	if gender == "F" {
 		return "good"

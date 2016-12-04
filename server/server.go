@@ -69,7 +69,7 @@ func InitRouting() *pat.Router {
 
 	r := pat.New()
 
-	/** bayes classifier spam **/
+	/** bayes classifier gender **/
 	r.Post("/gender", GenderHandler)
 	r.Post("/revoke", RevokeGenderHandler)
 	r.Post("/report", ReportGenderHandler)
