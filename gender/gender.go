@@ -21,7 +21,7 @@ var (
 	French_ignore_words_map     = make(map[string]int)
 
 	RedisClient  *redis.Client
-	Redis_prefix = "bayes:"
+	Redis_prefix = "genderbayes:"
 	correction   = 0.1
 )
 
