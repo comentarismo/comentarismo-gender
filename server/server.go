@@ -1,13 +1,13 @@
 package server
 
 import (
+	"comentarismo-gender/gender"
 	"fmt"
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/gorilla/pat"
 	"log"
 	"net/http"
 	"os"
-	"comentarismo-gender/gender"
 )
 
 var (
@@ -26,7 +26,7 @@ func init() {
 		var end = 2012
 		log.Println("Will start server on learning mode")
 
-		done := make(chan bool, end - start)
+		done := make(chan bool, end-start)
 		for i := start; i <= end; i++ {
 			targetFile := fmt.Sprintf("/gender/en/yob%d.txt", i)
 			go gender.StartLanguageGender(targetFile, done)

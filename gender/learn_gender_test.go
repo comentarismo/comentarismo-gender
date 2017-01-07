@@ -9,7 +9,6 @@ import (
 	"testing"
 )
 
-
 func TestFemaleGenderHandler(t *testing.T) {
 
 	Convey("Should Learn female names in english and report gender female for a female name", t, func() {
@@ -25,7 +24,7 @@ func TestFemaleGenderHandler(t *testing.T) {
 			var end = 2012
 			log.Println("Will start server on learning mode")
 
-			done := make(chan bool, end - start)
+			done := make(chan bool, end-start)
 			for i := start; i <= end; i++ {
 				targetFile := fmt.Sprintf("/en/yob%d.txt", i)
 				log.Println("Will learn ", targetFile)

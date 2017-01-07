@@ -9,12 +9,11 @@ import (
 	"testing"
 )
 
-
 func TestGenderColdstart(t *testing.T) {
 	Convey("Should Learn female names in english and report gender female for a female name", t, func() {
 		//var start = 1950
 		//var end = 2012
-		//if coldstart == true && serialized exist
+		//if LEARNGENDER == true
 		if gender.LEARNGENDER != "" {
 			runtime.GOMAXPROCS(runtime.NumCPU())
 			var start = 2012
@@ -33,7 +32,7 @@ func TestGenderColdstart(t *testing.T) {
 			log.Println("saving classifier.serialized")
 			gender.WriteToFile("classifier.serialized")
 		} else {
-			//read serialized
+			//read serialized, will fail if classifier.serialized was not yet generated
 			log.Println("Reading classifier.serialized")
 			GenderList, err := gender.LearnFromFile("classifier.serialized")
 			So(err, ShouldBeNil)

@@ -1,8 +1,8 @@
 package gender_test
 
 import (
-	"testing"
 	"comentarismo-gender/gender"
+	"testing"
 )
 
 func TestTidy(t *testing.T) {
@@ -31,7 +31,7 @@ func TestOccurances(t *testing.T) {
 
 func TestFlushEn(t *testing.T) {
 	lang := "en"
-	gender.Train("good", "sunshine drugs love sex lobster sloth",lang)
+	gender.Train("good", "sunshine drugs love sex lobster sloth", lang)
 	gender.Flush()
 
 	exists := gender.RedisClient.Exists(gender.Redis_prefix + "good")
@@ -43,15 +43,15 @@ func TestFlushEn(t *testing.T) {
 func TestClassifyEn(t *testing.T) {
 	lang := "en"
 	gender.Flush()
-	gender.Train("good", "sunshine drugs love sex lobster sloth",lang)
-	gender.Train("bad", "fear death horror government zombie god",lang)
+	gender.Train("good", "sunshine drugs love sex lobster sloth", lang)
+	gender.Train("bad", "fear death horror government zombie god", lang)
 
-	class := gender.Classify("sloths are so cute i love them",lang)
+	class := gender.Classify("sloths are so cute i love them", lang)
 	if class != "good" {
 		t.Errorf("Classify failed, should be good, result: %s", class)
 	}
 
-	class = gender.Classify("i fear god and love the government",lang)
+	class = gender.Classify("i fear god and love the government", lang)
 	if class != "bad" {
 		t.Errorf("Classify failed, should be bad, result: %s", class)
 	}
@@ -61,8 +61,8 @@ func TestUntrainEn(t *testing.T) {
 	lang := "en"
 
 	gender.Flush()
-	gender.Train("good", "sunshine drugs love sex lobster sloth",lang)
-	gender.Untrain("good", "sunshine drugs love sex lobster sloth",lang)
+	gender.Train("good", "sunshine drugs love sex lobster sloth", lang)
+	gender.Untrain("good", "sunshine drugs love sex lobster sloth", lang)
 
 	exists := gender.RedisClient.Exists(gender.Redis_prefix + "good")
 	if exists.Val() {
