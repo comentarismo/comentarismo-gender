@@ -2,13 +2,8 @@
 # http://software.clapper.org/daemonize/daemonize.html
 # https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build
 
-#authdisabled=true;
-#limitdisabled=true;
-#rediscachedisabled=true;
-#GITHUB_KEY=c96ecc15dddd3d58753e
-#GITHUB_SECRET=c35656e12f6120e21dd403a2e7c9fde80defe8d1
-#APP_NAME='comentarismo-moody'
-#WORKDIR='src/comentarismo-moody';
+#APP_NAME='comentarismo-gender'
+#WORKDIR='src/comentarismo-gender';
 #GO_PROCESS='main.go';
 
 #!/usr/bin/env bash
